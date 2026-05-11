@@ -3,44 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Abyss: Infinite Saga v6.6</title>
+    <title>Abyss: Infinite Saga v6.8 - Hyper CPS</title>
     <style>
         :root {
-            --bg: #020205;
-            --card: #0a0a12;
-            --primary: #00f2ff;
-            --secondary: #7000ff;
-            --accent: #00ff88;
-            --text: #e0e0e0;
-            --header-h: 135px;
-            --nav-h: 75px;
+            --bg: #020205; --card: #0a0a12; --primary: #00f2ff;
+            --secondary: #7000ff; --accent: #00ff88; --text: #e0e0e0;
+            --header-h: 135px; --nav-h: 75px;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body {
             background-color: var(--bg); color: var(--text);
             font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; height: 100vh;
             overflow: hidden; display: flex; flex-direction: column; user-select: none;
         }
-
         #header {
             height: var(--header-h); background: #000; border-bottom: 2px solid #1a1a2e;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
         }
         #crystal-display { font-size: 2.1rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 15px rgba(0,242,255,0.5); }
         #stats-bar { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 5px; letter-spacing: 1px; }
-
-        #game-area {
-            flex: 1; position: relative; overflow: hidden;
-            background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%);
-        }
-
+        #game-area { flex: 1; position: relative; overflow: hidden; background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); }
         #map-container { position: absolute; inset: 0; z-index: 500; display: none; background: var(--bg); }
         #map-viewport { width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none; background: radial-gradient(#1a1a2e 1px, transparent 1px); background-size: 60px 60px; }
         #map-content { position: absolute; width: 3000px; height: 3000px; }
         .map-node { position: absolute; width: 55px; height: 55px; border-radius: 50%; background: rgba(0,0,0,0.8); border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; transform: translate(-50%, -50%); }
         .node-active { border-color: var(--primary); box-shadow: 0 0 20px var(--primary); background: rgba(0,242,255,0.1); }
-
         #main-crystal {
             position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
             width: 140px; height: 180px;
@@ -50,24 +37,19 @@
             cursor: pointer; transition: transform 0.05s; z-index: 10;
         }
         #main-crystal:active { transform: translate(-50%, -50%) scale(0.9); }
-
         #panel { height: 35vh; background: var(--card); border-top: 2px solid var(--primary); overflow-y: auto; z-index: 100; }
         .row { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #1a1a2e; }
         .row.locked { opacity: 0.25; filter: grayscale(1); }
         .can-buy { background: rgba(0, 242, 255, 0.05); cursor: pointer; }
-
         .overlay { position: fixed; inset: 0; background: #010103; z-index: 2000; display: none; flex-direction: column; }
         .stat-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #1a1a2e; font-family: monospace; }
-
         nav { height: var(--nav-h); background: #000; display: flex; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.55rem; font-weight: bold; cursor: pointer; }
         .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); }
-
         .top-tools { position: absolute; right: 10px; top: 10px; display: flex; gap: 8px; z-index: 200; }
         .tool-btn { background: rgba(0, 242, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
         .pop { position: absolute; pointer-events: none; animation: pUp 0.8s forwards; color: #fff; font-weight: 900; z-index: 500; }
         @keyframes pUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
-        
         .prestige-btn { background: linear-gradient(45deg, #7000ff, #00f2ff); border: none; color: white; padding: 18px; border-radius: 12px; font-weight: bold; width: 90%; margin: 20px auto; display: block; font-size: 1rem; cursor: pointer; }
     </style>
 </head>
@@ -111,39 +93,39 @@
 
     <script>
         const BUILDINGS = [
-            { id: 1, name: "Unghie Sporche", cost: 15, cps: 0.5, icon: "🖐️", x: 1500, y: 1500 },
-            { id: 2, name: "Sasso Scheggiato", cost: 150, cps: 2, icon: "🪨", x: 1650, y: 1400 },
-            { id: 3, name: "Piccone Rustico", cost: 1200, cps: 8, icon: "⛏️", x: 1400, y: 1350 },
-            { id: 4, name: "Setaccio", cost: 12000, cps: 40, icon: "🥣", x: 1700, y: 1600 },
-            { id: 5, name: "Minatore Pallido", cost: 100000, cps: 150, icon: "🧟", x: 1300, y: 1650 },
-            { id: 6, name: "Trivella a Vapore", cost: 1.2e6, cps: 600, icon: "⚙️", x: 1850, y: 1450 },
-            { id: 7, name: "Laser Industriale", cost: 15e6, cps: 2500, icon: "🔦", x: 1150, y: 1400 },
-            { id: 8, name: "Pozzo Profondo", cost: 200e6, cps: 12000, icon: "🕳️", x: 1950, y: 1700 },
-            { id: 9, name: "Drone Esploratore", cost: 1.5e9, cps: 55000, icon: "🚁", x: 1050, y: 1750 },
-            { id: 10, name: "Estrattore Lumus", cost: 12e9, cps: 200000, icon: "💎", x: 1500, y: 1100 },
-            { id: 11, name: "Reattore a Fusione", cost: 100e9, cps: 1e6, icon: "☢️", x: 1800, y: 1100 },
-            { id: 12, name: "Cantiere Abissale", cost: 800e9, cps: 5e6, icon: "🏗️", x: 1200, y: 1100 },
-            { id: 13, name: "Sonda Quantistica", cost: 6e12, cps: 30e6, icon: "🛰️", x: 1500, y: 800 },
-            { id: 14, name: "Fabbrica Realtà", cost: 50e12, cps: 180e6, icon: "🏭", x: 1000, y: 800 },
-            { id: 15, name: "Architetto Vuoto", cost: 400e12, cps: 1e9, icon: "👁️", x: 2000, y: 800 },
-            { id: 16, name: "Buca Nera Doma", cost: 3e15, cps: 8e9, icon: "🌀", x: 1500, y: 500 },
-            { id: 17, name: "Portale Etereo", cost: 25e15, cps: 50e9, icon: "⛩️", x: 1000, y: 500 },
-            { id: 18, name: "Nucleo Galattico", cost: 200e15, cps: 350e9, icon: "🌌", x: 2000, y: 500 },
-            { id: 19, name: "Manipolatore Tempo", cost: 1.5e18, cps: 2e12, icon: "⏳", x: 1500, y: 200 },
-            { id: 20, name: "Seme del Cosmo", cost: 12e18, cps: 15e12, icon: "🌱", x: 800, y: 200 },
-            { id: 21, name: "Altare Divino", cost: 100e18, cps: 90e12, icon: "🔱", x: 2200, y: 200 },
-            { id: 22, name: "Mente Suprema", cost: 800e18, cps: 500e12, icon: "🧠", x: 1500, y: 2800 },
-            { id: 23, name: "Singolarità Zero", cost: 6e21, cps: 4e15, icon: "⚫", x: 1000, y: 2800 },
-            { id: 24, name: "Codice Sorgente", cost: 50e21, cps: 25e15, icon: "💾", x: 2000, y: 2800 },
-            { id: 25, name: "L'Essenza Pura", cost: 1e24, cps: 200e15, icon: "✨", x: 1500, y: 2500 }
+            { id: 1, name: "Unghie Sporche", cost: 15, cps: 2, icon: "🖐️", x: 1500, y: 1500 },
+            { id: 2, name: "Sasso Scheggiato", cost: 100, cps: 12, icon: "🪨", x: 1650, y: 1400 },
+            { id: 3, name: "Piccone Rustico", cost: 1100, cps: 45, icon: "⛏️", x: 1400, y: 1350 },
+            { id: 4, name: "Setaccio", cost: 12000, cps: 180, icon: "🥣", x: 1700, y: 1600 },
+            { id: 5, name: "Minatore Pallido", cost: 130000, cps: 950, icon: "🧟", x: 1300, y: 1650 },
+            { id: 6, name: "Trivella a Vapore", cost: 1.4e6, cps: 4500, icon: "⚙️", x: 1850, y: 1450 },
+            { id: 7, name: "Laser Industriale", cost: 20e6, cps: 22000, icon: "🔦", x: 1150, y: 1400 },
+            { id: 8, name: "Pozzo Profondo", cost: 330e6, cps: 110000, icon: "🕳️", x: 1950, y: 1700 },
+            { id: 9, name: "Drone Esploratore", cost: 5e9, cps: 550000, icon: "🚁", x: 1050, y: 1750 },
+            { id: 10, name: "Estrattore Lumus", cost: 75e9, cps: 3.5e6, icon: "💎", x: 1500, y: 1100 },
+            { id: 11, name: "Reattore a Fusione", cost: 1e12, cps: 25e6, icon: "☢️", x: 1800, y: 1100 },
+            { id: 12, name: "Cantiere Abissale", cost: 15e12, cps: 140e6, icon: "🏗️", x: 1200, y: 1100 },
+            { id: 13, name: "Sonda Quantistica", cost: 250e12, cps: 950e6, icon: "🛰️", x: 1500, y: 800 },
+            { id: 14, name: "Fabbrica Realtà", cost: 4e15, cps: 6.5e9, icon: "🏭", x: 1000, y: 800 },
+            { id: 15, name: "Architetto Vuoto", cost: 60e15, cps: 45e9, icon: "👁️", x: 2000, y: 800 },
+            { id: 16, name: "Buca Nera Doma", cost: 1e18, cps: 380e9, icon: "🌀", x: 1500, y: 500 },
+            { id: 17, name: "Portale Etereo", cost: 20e18, cps: 2.8e12, icon: "⛩️", x: 1000, y: 500 },
+            { id: 18, name: "Nucleo Galattico", cost: 350e18, cps: 15e12, icon: "🌌", x: 2000, y: 500 },
+            { id: 19, name: "Manipolatore Tempo", cost: 5e21, cps: 110e12, icon: "⏳", x: 1500, y: 200 },
+            { id: 20, name: "Seme del Cosmo", cost: 80e21, cps: 850e12, icon: "🌱", x: 800, y: 200 },
+            { id: 21, name: "Altare Divino", cost: 1.5e24, cps: 9.5e15, icon: "🔱", x: 2200, y: 200 },
+            { id: 22, name: "Mente Suprema", cost: 25e24, cps: 85e15, icon: "🧠", x: 1500, y: 2800 },
+            { id: 23, name: "Singolarità Zero", cost: 500e24, cps: 950e15, icon: "⚫", x: 1000, y: 2800 },
+            { id: 24, name: "Codice Sorgente", cost: 8e27, cps: 12e18, icon: "💾", x: 2000, y: 2800 },
+            { id: 25, name: "L'Essenza Pura", cost: 150e27, cps: 250e18, icon: "✨", x: 1500, y: 2500 }
         ];
 
         const UPGRADES = [
             { id: 'u1', name: "Dita di Ferro", cost: 500, d: "Click x2", req: 1, eff: (g)=>g.clickMult *= 2 },
-            { id: 'u2', name: "Luce Blu", cost: 5000, d: "Produzione +10%", req: 5, eff: (g)=>g.m *= 1.1 },
-            { id: 'u3', name: "Setaccio Magnetico", cost: 50000, d: "Edifici 1-5 x2", req: 10, eff: (g)=>g.bBoost[1]=2 },
+            { id: 'u2', name: "Luce Blu", cost: 5000, d: "Produzione +20%", req: 5, eff: (g)=>g.m *= 1.2 },
+            { id: 'u3', name: "Magnetismo", cost: 50000, d: "Edifici 1-5 x2", req: 10, eff: (g)=>g.bBoost[1]=2 },
             { id: 'u4', name: "Super-Trivella", cost: 1e6, d: "Click x5", req: 50, eff: (g)=>g.clickMult *= 5 },
-            { id: 'u5', name: "Vuoto Stabile", cost: 1e9, d: "Produzione +50%", req: 100, eff: (g)=>g.m *= 1.5 }
+            { id: 'u5', name: "Vuoto Stabile", cost: 1e9, d: "Produzione x2", req: 100, eff: (g)=>g.m *= 2 }
         ];
 
         const STORIES = [
@@ -171,7 +153,12 @@
         const track = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'); track.loop = true;
 
         function format(n) {
+            if(n >= 1e30) return (n/1e30).toFixed(2) + " Q";
+            if(n >= 1e27) return (n/1e27).toFixed(2) + " O";
             if(n >= 1e24) return (n/1e24).toFixed(2) + " Y";
+            if(n >= 1e21) return (n/1e21).toFixed(2) + " Z";
+            if(n >= 1e18) return (n/1e18).toFixed(2) + " E";
+            if(n >= 1e15) return (n/1e15).toFixed(2) + " P";
             if(n >= 1e12) return (n/1e12).toFixed(2) + " T";
             if(n >= 1e9) return (n/1e9).toFixed(2) + " B";
             if(n >= 1e6) return (n/1e6).toFixed(2) + " M";
@@ -206,7 +193,7 @@
         function ascend() {
             let cost = getPresCost();
             if(g.t >= cost) {
-                g.m += (g.t / cost) * 0.20; g.presCount++;
+                g.m += (g.t / cost) * 0.25; g.presCount++;
                 g.c = 0; g.b = {}; g.u = []; g.clickMult = 1; g.bBoost = {}; g.t = 0; 
                 alert("ASCENSIONE LIVELLO " + g.presCount); setTab('shop'); updateMapNodes(); save();
             }
@@ -258,13 +245,13 @@
                 let cost = getPresCost(); let can = g.t >= cost;
                 cont.innerHTML = `<div style="padding:20px;text-align:center">
                     <h3 style="color:var(--primary)">Ascensione Lv. ${g.presCount}</h3>
-                    <p>Prossimo costo: <b style="color:gold">${format(cost)} Totali</b></p>
+                    <p>Bonus attuale: x${g.m.toFixed(2)}</p>
+                    <p>Costo per ascendere: <b style="color:gold">${format(cost)} Totali</b></p>
                     <button class="prestige-btn" style="opacity:${can?1:0.3}" onclick="ascend()">ASCENDI ORA</button>
                 </div>`;
             }
         }
 
-        // --- STATISTICHE DETTAGLIATE ---
         function toggleOverlay(id) {
             const el = document.getElementById(id); el.style.display = (el.style.display === 'flex' ? 'none' : 'flex');
             if(id === 'stats-overlay') {
@@ -275,9 +262,7 @@
                     <div class="stat-item"><span>Produzione (CPS):</span><span>${format(getCPS())}</span></div>
                     <div class="stat-item"><span>Click Effettuati:</span><span>${g.cl}</span></div>
                     <div class="stat-item"><span>Edifici Totali:</span><span>${totalBuildings}</span></div>
-                    <div class="stat-item"><span>Moltiplicatore Bonus:</span><span>x${g.m.toFixed(2)}</span></div>
                     <div class="stat-item"><span>Livello Ascensione:</span><span>${g.presCount}</span></div>
-                    <div class="stat-item"><span>Ultimo Salvataggio:</span><span>${new Date(g.lastSave).toLocaleTimeString()}</span></div>
                 `;
             }
         }
@@ -321,7 +306,7 @@
             if(s) { 
                 Object.assign(g, JSON.parse(s)); 
                 let diff = (Date.now() - g.lastSave) / 1000;
-                if(diff > 60) { let gain = getCPS() * diff * 0.5; g.c += gain; g.t += gain; alert("Bentornato! Hai guadagnato " + format(gain)); }
+                if(diff > 60) { let gain = getCPS() * diff * 0.5; g.c += gain; g.t += gain; alert("Bentornato! Produzione offline: +" + format(gain)); }
             }
             setInterval(() => { g.c += getCPS()/10; g.t += getCPS()/10; updateUI(); }, 100);
             setInterval(save, 10000);
